@@ -1,0 +1,6 @@
+[submodule "impulse-physics-xna"]
+	path = impulse-physics-xna
+	url = https://github.com/Richie78321/impulse-physics-xna.git
+[submodule "modular-genetics"]
+	path = modular-genetics
+	url = https://github.com/Richie78321/modular-genetics.git
