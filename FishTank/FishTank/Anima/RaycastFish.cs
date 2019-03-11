@@ -14,11 +14,11 @@ namespace FishTank.Anima
     class RaycastFish : Fish
     {
         private const int NUM_RAYCASTS = 4;
-        private const int RAYCAST_CATEGORIES = 4;
+        private const int RAYCAST_CATEGORIES = 5;
 
         private const int OTHER_INPUTS = 1;
 
-        private const int HIDDEN_NEURONS = 20;
+        private const int HIDDEN_NEURONS = 25;
         private const int OUTPUT_NUM = 2;
 
         public static ModularMember CreateModularMember(Random random)
