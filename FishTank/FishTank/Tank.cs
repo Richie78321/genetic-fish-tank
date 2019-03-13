@@ -9,12 +9,20 @@ namespace FishTank
 {
     class Tank
     {
-        public Tank()
+        public readonly float Width, Height;
+        public Tank(float width, float height)
         {
-
+            Width = width;
+            Height = height;
         }
 
         private List<Entity> containedEntities = new List<Entity>();
+        public void AddEntity(Entity entity)
+        {
+            containedEntities.Add(entity);
+        }
+
+        public Entity[] ContainedEntities => containedEntities.ToArray();
         public void Update()
         {
             //Update entities

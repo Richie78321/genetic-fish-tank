@@ -34,6 +34,8 @@
             // 
             // autoUpdateTimer
             // 
+            this.autoUpdateTimer.Enabled = true;
+            this.autoUpdateTimer.Interval = 15;
             this.autoUpdateTimer.Tick += new System.EventHandler(this.autoUpdateTimer_Tick);
             // 
             // TankVisual
@@ -41,6 +43,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(854, 619);
+            this.DoubleBuffered = true;
             this.Name = "TankVisual";
             this.Text = "Fish Tank";
             this.Load += new System.EventHandler(this.TankVisual_Load);
