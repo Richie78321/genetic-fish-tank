@@ -22,14 +22,18 @@ namespace FishTank
         }
 
         //TEST
-        private bool TestOneHot(Entity entity) { return true; }
+        private bool TestOneHot(Entity entity) { return false; }
+        private bool IsBoundary(Entity entity)
+        {
+            return entity is Boundary; 
+        }
 
         private Tank testTank;
         private void TankVisual_Load(object sender, EventArgs e)
         {
             //TEST 
             testTank = new Tank(Width, Height);
-            testTank.AddEntity(new RaycastFish(new RigidBody(new RegularPolygon(new Vector2(Width / 2, Height / 2), 25, 3), DefinedMaterials.Wood), "Test Fish", new Random(), new RaycastFishConfig(7, (float)Math.PI, 125F, new VisualRaytracer.OneHotIndicator[] { TestOneHot, TestOneHot, TestOneHot }, 20)));
+            testTank.AddEntity(new RaycastFish(new RigidBody(new RegularPolygon(new Vector2(Width / 2, Height / 2), 25, 3), DefinedMaterials.Wood), "Test Fish", new Random(), new RaycastFishConfig(5, (float)Math.PI, 125F, new VisualRaytracer.OneHotIndicator[] { TestOneHot, TestOneHot, TestOneHot }, 20)));
         }
 
         private void paint(object sender, PaintEventArgs e)

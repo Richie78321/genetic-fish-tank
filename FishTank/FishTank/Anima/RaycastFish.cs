@@ -15,7 +15,7 @@ namespace FishTank.Anima
 {
     class RaycastFish : Fish
     {
-        private const int GLOBAL_INPUTS = 2;
+        private const int GLOBAL_INPUTS = 3;
         private const int OUTPUT_NUM = 2;
 
         public static ModularMember CreateModularMember(Random random, RaycastFishConfig fishConfig)
@@ -92,9 +92,17 @@ namespace FishTank.Anima
             DrawPolygon(RigidBody.CollisionPolygon, Brushes.Blue, e);
             //e.Graphics.FillEllipse(Brushes.Blue, RigidBody.CollisionPolygon.CenterPoint.X - (DRAW_SIZE / 2), RigidBody.CollisionPolygon.CenterPoint.Y - (DRAW_SIZE / 2), DRAW_SIZE, DRAW_SIZE);
             if (currentRaytraces != null)
-                for (int i = 0; i < currentRaytraces.Length; i++) e.Graphics.DrawLine(Pens.Red, currentRaytraces[i].EndPoints[0].X, currentRaytraces[i].EndPoints[0].Y, currentRaytraces[i].EndPoints[1].X, currentRaytraces[i].EndPoints[1].Y);
+            {
+                for (int i = 0; i < currentRaytraces.Length; i++)
+                {
+                    Pen drawPen = Pens.Green;
+                    if (currentRaytraceData[i][0] != 1) drawPen = Pens.Red;
+                    e.Graphics.DrawLine(drawPen, currentRaytraces[i].EndPoints[0].X, currentRaytraces[i].EndPoints[0].Y, currentRaytraces[i].EndPoints[1].X, currentRaytraces[i].EndPoints[1].Y);
+                }
+            }
         }
 
+        private bool lastMovedLeft = true;
         public override void Update(Tank fishTank)
         {
             //Run network
@@ -106,11 +114,13 @@ namespace FishTank.Anima
             {
                 //Turn left
                 RigidBody.CollisionPolygon.Rotate(-TURN_DELTA, RigidBody.CollisionPolygon.CenterPoint);
+                lastMovedLeft = true;
             }
             else
             {
                 //Turn right
                 RigidBody.CollisionPolygon.Rotate(TURN_DELTA, RigidBody.CollisionPolygon.CenterPoint);
+                lastMovedLeft = false;
             }
 
             //Move forward and ensure bounds
@@ -120,6 +130,7 @@ namespace FishTank.Anima
         }
 
         private LineSegment[] currentRaytraces = null;
+        private double[][] currentRaytraceData = null;
         private double[] BuildInput(Tank fishTank)
         {
             List<double> inputs = new List<double>();
@@ -127,13 +138,17 @@ namespace FishTank.Anima
             //Add fish information
             inputs.Add((RigidBody.CollisionPolygon.TotalRotation % (2 * Math.PI)) / (2 * Math.PI));
             inputs.Add(hunger);
+            inputs.Add(Convert.ToDouble(lastMovedLeft));
 
             //Add raytrace data
             currentRaytraces = CreateVisualRays(RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.TotalRotation, fishConfig);
             Entity[] entitiesToCheck = fishTank.ContainedEntities.Where(entity => entity != this).ToArray();
+            currentRaytraceData = new double[currentRaytraces.Length][];
             for (int i = 0; i < currentRaytraces.Length; i++)
             {
-                inputs.AddRange(VisualRaytracer.ProcessRaytrace(entitiesToCheck, currentRaytraces[i], fishConfig.RaycastOneHots));
+                double[] raytraceOutput = VisualRaytracer.ProcessRaytrace(entitiesToCheck, currentRaytraces[i], fishConfig.RaycastOneHots);
+                currentRaytraceData[i] = raytraceOutput;
+                inputs.AddRange(raytraceOutput);
             }
 
             return inputs.ToArray();

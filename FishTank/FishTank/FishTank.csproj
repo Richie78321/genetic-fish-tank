@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Anima\Fish.cs" />
     <Compile Include="Anima\RaycastFish.cs" />
+    <Compile Include="Boundary.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
