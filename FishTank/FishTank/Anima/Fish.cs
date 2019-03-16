@@ -14,16 +14,17 @@ namespace FishTank.Anima
         public abstract string Species { get; }
 
         //TEMP
-        protected float hunger = 0;
+        public float hunger = 0;
 
-        public override RigidBody RigidBody => rigidBody;
+        public override RigidBodyRef RigidBody => rigidBody;
         private ModularMember modularMember;
         public ModularMember ModularMember => modularMember;
-        private RigidBody rigidBody;
-        public Fish(ModularMember modularMember, RigidBody rigidBody)
+        private RigidBodyRef rigidBody;
+        public Fish(ModularMember modularMember, RigidBodyRef rigidBody)
         {
             this.rigidBody = rigidBody;
             this.modularMember = modularMember;
+            rigidBody.EntityReference = this;
         }
     }
 }

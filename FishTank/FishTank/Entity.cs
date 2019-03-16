@@ -9,11 +9,13 @@ using ImpulseEngine2;
 
 namespace FishTank
 {
-    abstract class Entity
+    public abstract class Entity
     {
-        public abstract RigidBody RigidBody { get; }
+        public abstract RigidBodyRef RigidBody { get; }
 
         public abstract void Update(Tank fishTank);
         public abstract void Draw(Tank fishTank, PaintEventArgs e);
+
+        public virtual void OnIntersection(Entity otherEntity, Tank fishTank) { }
     }
 }

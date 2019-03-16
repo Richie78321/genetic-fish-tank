@@ -23,7 +23,7 @@ namespace FishTank.Anima
             //Create phenotypes
             SequentialModelFactory sequentialModelFactory = new SequentialModelFactory(new int[] { (fishConfig.NumRaycasts * (fishConfig.RaycastOneHots.Length + 1)) + GLOBAL_INPUTS });
             sequentialModelFactory.AddModel(new DenseLayer(fishConfig.HiddenNeurons, ComputationModel.ReLUActivation));
-            sequentialModelFactory.AddModel(new DenseLayer(OUTPUT_NUM, ComputationModel.ReLUActivation));
+            sequentialModelFactory.AddModel(new DenseLayer(OUTPUT_NUM, ComputationModel.LinearActivation));
             Phenotype[] phenotypes = new Phenotype[1];
             phenotypes[(int)Modules.NeuralNet] = sequentialModelFactory.DeployModel();
 
@@ -57,7 +57,7 @@ namespace FishTank.Anima
             return visualRays;
         }
 
-        private const float TURN_DELTA = (float)Math.PI / 48;
+        private const float TURN_DELTA = (float)Math.PI / 128;
         private const float MOVE_SPEED = 1F;
 
         private enum Modules
@@ -73,13 +73,15 @@ namespace FishTank.Anima
             e.Graphics.FillPolygon(brush, points);
         }
 
+        private const float BOUNDARY_PADDING = .01F;
+
         //Object
         public override string Species => species;
         private string species;
 
         private RaycastFishConfig fishConfig;
 
-        public RaycastFish(RigidBody rigidBody, string species, Random random, RaycastFishConfig fishConfig) : base(CreateModularMember(random, fishConfig), rigidBody)
+        public RaycastFish(RigidBodyRef rigidBody, string species, Random random, RaycastFishConfig fishConfig) : base(CreateModularMember(random, fishConfig), rigidBody)
         {
             this.species = species;
             this.fishConfig = fishConfig;
@@ -108,6 +110,7 @@ namespace FishTank.Anima
             //Run network
             double[] networkInput = BuildInput(fishTank);
             double[] networkOutput = (double[])((SequentialModel)ModularMember.Phenotypes[(int)Modules.NeuralNet]).Transform(networkInput);
+            networkOutput = ComputationModel.SoftmaxFunction(networkOutput);
 
             //Act according to network
             if (networkOutput[0] > networkOutput[1])
@@ -125,7 +128,7 @@ namespace FishTank.Anima
 
             //Move forward and ensure bounds
             Vector2 targetPoint = RigidBody.CollisionPolygon.CenterPoint + (new Vector2((float)Math.Cos(RigidBody.CollisionPolygon.TotalRotation - (Math.PI / 2)), (float)Math.Sin(RigidBody.CollisionPolygon.TotalRotation - (Math.PI / 2))) * MOVE_SPEED);
-            targetPoint = Vector2.Clamp(targetPoint, Vector2.Zero, new Vector2(fishTank.Width, fishTank.Height));
+            targetPoint = Vector2.Clamp(targetPoint, Vector2.Zero + (Vector2.One * BOUNDARY_PADDING), new Vector2(fishTank.Width, fishTank.Height) - (Vector2.One * BOUNDARY_PADDING));
             RigidBody.CollisionPolygon.TranslateTo(targetPoint);
         }
 
@@ -142,7 +145,7 @@ namespace FishTank.Anima
 
             //Add raytrace data
             currentRaytraces = CreateVisualRays(RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.TotalRotation, fishConfig);
-            Entity[] entitiesToCheck = fishTank.ContainedEntities.Where(entity => entity != this).ToArray();
+            Entity[] entitiesToCheck = fishTank.ContainedEntities.Where(entity => entity != this && LineSegment.Distance(entity.RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.CenterPoint) <= entity.RigidBody.CollisionPolygon.MaximumRadius + fishConfig.RaycastLength).ToArray();
             currentRaytraceData = new double[currentRaytraces.Length][];
             for (int i = 0; i < currentRaytraces.Length; i++)
             {
