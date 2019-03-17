@@ -7,6 +7,7 @@ using FishTank.Anima;
 using ImpulseEngine2;
 using ImpulseEngine2.Materials;
 using Microsoft.Xna.Framework;
+using System.Drawing;
 
 namespace FishTank
 {
@@ -37,13 +38,14 @@ namespace FishTank
         {
             for (int i = 0; i < tankConfig.NumSpawn; i++)
             {
-                Fish newFish = new RaycastFish(new RigidBodyRef(new RegularPolygon(new Vector2((float)Random.NextDouble() * Width, (float)Random.NextDouble() * Height), 10, 3), DefinedMaterials.Rubber, null), "Test Fish", new Random(), new RaycastFishConfig(5, (float)Math.PI, 125F, new VisualRaytracer.OneHotIndicator[] { IsBoundary, IsFish, IsFood }, 20));
+                Fish newFish = new RaycastFish(RaycastFish.GetStandardBody(this), "Test Fish", Random, 
+                    new RaycastFishConfig(5, (float)Math.PI, 200F, new VisualRaytracer.OneHotIndicator[] { IsBoundary, IsFish, IsFood }, 20, 10F, .01F, 15F, 10F, 300F, .02, Brushes.Blue));
                 AddEntity(newFish);
             }
 
             for (int i = 0; i < tankConfig.FoodQuantity; i++)
             {
-                AddEntity(new FoodNode(new Vector2((float)Random.NextDouble() * Width, (float)Random.NextDouble() * Height)));
+                AddEntity(new FoodNode(new Vector2((float)Random.NextDouble() * Width, (float)Random.NextDouble() * Height), tankConfig.FoodValue));
             }
         }
     }
@@ -52,10 +54,13 @@ namespace FishTank
     {
         public readonly int NumSpawn;
         public readonly int FoodQuantity;
-        public RaytraceTankConfig(int numSpawn, int foodQuantity)
+        public readonly float FoodValue;
+
+        public RaytraceTankConfig(int numSpawn, int foodQuantity, float foodValue)
         {
             NumSpawn = numSpawn;
             FoodQuantity = foodQuantity;
+            FoodValue = foodValue;
         }
     }
 }

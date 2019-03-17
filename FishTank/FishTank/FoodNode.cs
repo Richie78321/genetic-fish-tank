@@ -20,9 +20,14 @@ namespace FishTank
         public override RigidBodyRef RigidBody => rigidBody;
         private RigidBodyRef rigidBody;
 
-        public FoodNode(Vector2 position)
+        private float foodValue;
+        private int tickTimeout;
+
+        public FoodNode(Vector2 position, float foodValue, int tickTimeout = 20)
         {
             rigidBody = new RigidBodyRef(new RegularPolygon(position, NODE_SIZE, 8), DefinedMaterials.Static, this);
+            this.foodValue = foodValue;
+            this.tickTimeout = tickTimeout;
         }
 
         public override void Draw(Tank fishTank, PaintEventArgs e)
@@ -41,10 +46,9 @@ namespace FishTank
             //Make consumed
             if (otherEntity is Fish fish)
             {
-                //TEMP
-                fish.hunger += 1;
+                fish.FoodValue += foodValue;
                 fishTank.RemoveEntity(this);
-                fishTank.AddEntity(new FoodNode(new Vector2((float)fishTank.Random.NextDouble() * fishTank.Width, (float)fishTank.Random.NextDouble() * fishTank.Height)));
+                fishTank.AddEntityIn(new FoodNode(new Vector2((float)fishTank.Random.NextDouble() * fishTank.Width, (float)fishTank.Random.NextDouble() * fishTank.Height), foodValue, tickTimeout), tickTimeout);
             }
         }
     }

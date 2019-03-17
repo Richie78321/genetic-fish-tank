@@ -10,6 +10,7 @@ using ModularGenetics.AI.Dense;
 using ImpulseEngine2;
 using Microsoft.Xna.Framework;
 using System.Drawing;
+using ImpulseEngine2.Materials;
 
 namespace FishTank.Anima
 {
@@ -75,37 +76,109 @@ namespace FishTank.Anima
 
         private const float BOUNDARY_PADDING = .01F;
 
+        public static RigidBodyRef GetStandardBody(Tank fishTank)
+        {
+            return new RigidBodyRef(new RegularPolygon(new Vector2((float)fishTank.Random.NextDouble() * fishTank.Width, (float)fishTank.Random.NextDouble() * fishTank.Height), 10, 3), DefinedMaterials.Rubber, null);
+        }
+
         //Object
         public override string Species => species;
         private string species;
 
-        private RaycastFishConfig fishConfig;
+        public readonly RaycastFishConfig FishConfig;
+        public bool CanBreed => FoodValue >= FishConfig.BreedingThreshold;
 
-        public RaycastFish(RigidBodyRef rigidBody, string species, Random random, RaycastFishConfig fishConfig) : base(CreateModularMember(random, fishConfig), rigidBody)
+        public RaycastFish(RigidBodyRef rigidBody, string species, Random random, RaycastFishConfig fishConfig) : base(CreateModularMember(random, fishConfig), rigidBody, fishConfig.StartingFoodValue)
         {
             this.species = species;
-            this.fishConfig = fishConfig;
+            this.FishConfig = fishConfig;
+        }
+
+        public RaycastFish(RigidBodyRef rigidBody, string species, ModularMember modularMember, RaycastFishConfig fishConfig) : base(modularMember, rigidBody, fishConfig.StartingFoodValue)
+        {
+            this.species = species;
+            this.FishConfig = fishConfig;
         }
 
         //TEMP
         private const float DRAW_SIZE = 10F;
         public override void Draw(Tank fishTank, PaintEventArgs e)
         {
-            DrawPolygon(RigidBody.CollisionPolygon, Brushes.Blue, e);
+            DrawPolygon(RigidBody.CollisionPolygon, FishConfig.DrawColor, e);
             //e.Graphics.FillEllipse(Brushes.Blue, RigidBody.CollisionPolygon.CenterPoint.X - (DRAW_SIZE / 2), RigidBody.CollisionPolygon.CenterPoint.Y - (DRAW_SIZE / 2), DRAW_SIZE, DRAW_SIZE);
-            if (currentRaytraces != null)
+            //if (currentRaytraces != null)
+            //{
+            //    for (int i = 0; i < currentRaytraces.Length; i++)
+            //    {
+            //        Pen drawPen = Pens.Green;
+            //        if (currentRaytraceData[i][0] != 1) drawPen = Pens.Red;
+            //        e.Graphics.DrawLine(drawPen, currentRaytraces[i].EndPoints[0].X, currentRaytraces[i].EndPoints[0].Y, currentRaytraces[i].EndPoints[1].X, currentRaytraces[i].EndPoints[1].Y);
+            //    }
+            //}
+        }
+
+        public override void Update(Tank fishTank)
+        {
+            //Apply metabolism
+            FoodValue -= FishConfig.Metabolism;
+            if (FoodValue <= 0) HandleDeath(fishTank);
+
+            //Check breeding
+            if (CanBreed) HandleBreeding(fishTank);
+
+            GetNextMove(fishTank);
+        }
+
+        private void HandleDeath(Tank fishTank)
+        {
+            //TEMP add extinction stuff
+            fishTank.RemoveEntity(this);
+        }
+
+        private void HandleBreeding(Tank fishTank)
+        {
+            //Find eligible mates
+            Entity[] mates = fishTank.ContainedEntities.Where(entity => entity != this && entity is RaycastFish rayFish && species.Equals(rayFish.species) && rayFish.CanBreed && LineSegment.Distance(rayFish.RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.CenterPoint) <= FishConfig.BreedingRadius).ToArray();
+            Array.Sort(mates, (Entity x, Entity y) => { return ((Fish)x).FoodValue.CompareTo(((Fish)y).FoodValue); });
+
+            if (mates.Length > 0)
             {
-                for (int i = 0; i < currentRaytraces.Length; i++)
-                {
-                    Pen drawPen = Pens.Green;
-                    if (currentRaytraceData[i][0] != 1) drawPen = Pens.Red;
-                    e.Graphics.DrawLine(drawPen, currentRaytraces[i].EndPoints[0].X, currentRaytraces[i].EndPoints[0].Y, currentRaytraces[i].EndPoints[1].X, currentRaytraces[i].EndPoints[1].Y);
-                }
+                //Mate
+                Breed((RaycastFish)mates[0], fishTank);
             }
         }
 
+        private void Breed(RaycastFish otherFish, Tank fishTank)
+        {
+            Vector2 spawnPoint = (otherFish.RigidBody.CollisionPolygon.CenterPoint + RigidBody.CollisionPolygon.CenterPoint) / 2;
+            float spawnRadius = LineSegment.Distance(RigidBody.CollisionPolygon.CenterPoint, spawnPoint);
+
+            List<ModularMember> childrenModules = new List<ModularMember>(4);
+            childrenModules.AddRange(ModularMember.BreedMembers(ModularMember, otherFish.ModularMember, FishConfig.MutationRate, fishTank.Random));
+            childrenModules.AddRange(ModularMember.BreedMembers(ModularMember, otherFish.ModularMember, FishConfig.MutationRate, fishTank.Random));
+
+            Brush familyColor = new SolidBrush(System.Drawing.Color.FromArgb(fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256)));
+
+            for (int i = 0; i < childrenModules.Count; i++)
+            {
+                RigidBodyRef standardBody = GetStandardBody(fishTank);
+
+                float deviationMagnitude = (float)fishTank.Random.NextDouble() * spawnRadius;
+                float deviationAngle = (float)(fishTank.Random.NextDouble() * Math.PI * 2);
+                standardBody.CollisionPolygon.TranslateTo(spawnPoint + new Vector2(deviationMagnitude * (float)Math.Cos(deviationMagnitude), deviationMagnitude * (float)Math.Sin(deviationMagnitude)));
+
+                RaycastFishConfig newConfig = FishConfig;
+                newConfig.DrawColor = familyColor;
+
+                RaycastFish childFish = new RaycastFish(standardBody, species, childrenModules[i], newConfig);
+                fishTank.AddEntity(childFish);
+            }
+            FoodValue -= FishConfig.BreedingCost;
+            otherFish.FoodValue -= otherFish.FishConfig.BreedingCost;
+        }
+
         private bool lastMovedLeft = true;
-        public override void Update(Tank fishTank)
+        private void GetNextMove(Tank fishTank)
         {
             //Run network
             double[] networkInput = BuildInput(fishTank);
@@ -140,16 +213,16 @@ namespace FishTank.Anima
 
             //Add fish information
             inputs.Add((RigidBody.CollisionPolygon.TotalRotation % (2 * Math.PI)) / (2 * Math.PI));
-            inputs.Add(hunger);
+            inputs.Add(ComputationModel.SigmoidActivation(FoodValue));
             inputs.Add(Convert.ToDouble(lastMovedLeft));
 
             //Add raytrace data
-            currentRaytraces = CreateVisualRays(RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.TotalRotation, fishConfig);
-            Entity[] entitiesToCheck = fishTank.ContainedEntities.Where(entity => entity != this && LineSegment.Distance(entity.RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.CenterPoint) <= entity.RigidBody.CollisionPolygon.MaximumRadius + fishConfig.RaycastLength).ToArray();
+            currentRaytraces = CreateVisualRays(RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.TotalRotation, FishConfig);
+            Entity[] entitiesToCheck = fishTank.ContainedEntities.Where(entity => entity != this && LineSegment.Distance(entity.RigidBody.CollisionPolygon.CenterPoint, RigidBody.CollisionPolygon.CenterPoint) <= entity.RigidBody.CollisionPolygon.MaximumRadius + FishConfig.RaycastLength).ToArray();
             currentRaytraceData = new double[currentRaytraces.Length][];
             for (int i = 0; i < currentRaytraces.Length; i++)
             {
-                double[] raytraceOutput = VisualRaytracer.ProcessRaytrace(entitiesToCheck, currentRaytraces[i], fishConfig.RaycastOneHots);
+                double[] raytraceOutput = VisualRaytracer.ProcessRaytrace(entitiesToCheck, currentRaytraces[i], FishConfig.RaycastOneHots);
                 currentRaytraceData[i] = raytraceOutput;
                 inputs.AddRange(raytraceOutput);
             }
@@ -167,7 +240,18 @@ namespace FishTank.Anima
         public readonly VisualRaytracer.OneHotIndicator[] RaycastOneHots;
         public readonly int HiddenNeurons;
 
-        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, int HiddenNeurons)
+        public readonly float StartingFoodValue;
+        public readonly float Metabolism;
+
+        public readonly float BreedingThreshold;
+        public readonly float BreedingCost;
+        public readonly float BreedingRadius;
+
+        public readonly double MutationRate;
+
+        public Brush DrawColor;
+
+        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, int HiddenNeurons, float StartingFoodValue, float Metabolism, float BreedingThreshold, float BreedingCost, float BreedingRadius, double MutationRate, Brush DrawColor)
         {
             this.NumRaycasts = NumRaycasts;
             this.TotalRaycastAngle = TotalRaycastAngle;
@@ -175,6 +259,14 @@ namespace FishTank.Anima
             this.RaycastOneHots = RaycastOneHots;
             this.HiddenNeurons = HiddenNeurons;
             RaycastAngleDelta = TotalRaycastAngle / (NumRaycasts - 1);
+
+            this.StartingFoodValue = StartingFoodValue;
+            this.Metabolism = Metabolism;
+            this.BreedingThreshold = BreedingThreshold;
+            this.BreedingCost = BreedingCost;
+            this.BreedingRadius = BreedingRadius;
+            this.MutationRate = MutationRate;
+            this.DrawColor = DrawColor;
         }
     }
 }

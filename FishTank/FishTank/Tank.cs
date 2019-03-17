@@ -55,6 +55,12 @@ namespace FishTank
             collisionEventHandler.AddBody(entity.RigidBody);
         }
 
+        private List<EntityAddTimer> entityAddTimers = new List<EntityAddTimer>();
+        public void AddEntityIn(Entity entity, int numTicks)
+        {
+            entityAddTimers.Add(new EntityAddTimer(entity, numTicks));
+        }
+
         public void RemoveEntity(Entity entity)
         {
             containedEntities.Remove(entity);
@@ -64,6 +70,17 @@ namespace FishTank
         public Entity[] ContainedEntities => containedEntities.ToArray();
         public void Update()
         {
+            //Update timers
+            EntityAddTimer[] addTimers = entityAddTimers.ToArray();
+            for (int i = 0; i < addTimers.Length; i++)
+            {
+                if (--addTimers[i].NumTicks <= 0)
+                {
+                    AddEntity(addTimers[i].Entity);
+                    entityAddTimers.Remove(addTimers[i]);
+                }
+            }
+
             //Update handler
             collisionEventHandler.Update(null);
 
@@ -77,6 +94,18 @@ namespace FishTank
             //Draw entities
             Entity[] currentContainedEntities = containedEntities.ToArray();
             for (int i = 0; i < currentContainedEntities.Length; i++) currentContainedEntities[i].Draw(this, e);
+        }
+    }
+
+    class EntityAddTimer
+    {
+        public readonly Entity Entity;
+        public int NumTicks;
+
+        public EntityAddTimer(Entity entity, int numTicks)
+        {
+            this.Entity = entity;
+            this.NumTicks = numTicks;
         }
     }
 }
