@@ -10,9 +10,9 @@ namespace FishTank
 {
     class VisualRaytracer
     {
-        public delegate bool OneHotIndicator(Entity entity);
+        public delegate bool OneHotIndicator(Entity self, Entity intersectedEntity);
 
-        public static double[] ProcessRaytrace(Entity[] entities, LineSegment raytrace, OneHotIndicator[] oneHotIndicators)
+        public static double[] ProcessRaytrace(Entity self, Entity[] entities, LineSegment raytrace, OneHotIndicator[] oneHotIndicators)
         {
             //Find closest intersection with entities
             Entity intersectedEntity = null;
@@ -35,7 +35,7 @@ namespace FishTank
             outputs[0] = intersectionDistance / raytrace.Length;
             for (int i = 0; i < oneHotIndicators.Length; i++)
             {
-                outputs[i + 1] = Convert.ToDouble(oneHotIndicators[i](intersectedEntity));
+                outputs[i + 1] = Convert.ToDouble(oneHotIndicators[i](self, intersectedEntity));
             }
             return outputs;
         }

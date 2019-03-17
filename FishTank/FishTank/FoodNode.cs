@@ -25,7 +25,7 @@ namespace FishTank
 
         public FoodNode(Vector2 position, float foodValue, int tickTimeout = 20)
         {
-            rigidBody = new RigidBodyRef(new RegularPolygon(position, NODE_SIZE, 8), DefinedMaterials.Static, this);
+            rigidBody = new RigidBodyRef(new RegularPolygon(position, NODE_SIZE, 4), DefinedMaterials.Static, this);
             this.foodValue = foodValue;
             this.tickTimeout = tickTimeout;
         }

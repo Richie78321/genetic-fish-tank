@@ -157,7 +157,7 @@ namespace FishTank.Anima
             childrenModules.AddRange(ModularMember.BreedMembers(ModularMember, otherFish.ModularMember, FishConfig.MutationRate, fishTank.Random));
             childrenModules.AddRange(ModularMember.BreedMembers(ModularMember, otherFish.ModularMember, FishConfig.MutationRate, fishTank.Random));
 
-            Brush familyColor = new SolidBrush(System.Drawing.Color.FromArgb(fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256)));
+            //Brush familyColor = new SolidBrush(System.Drawing.Color.FromArgb(fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256), fishTank.Random.Next(0, 256)));
 
             for (int i = 0; i < childrenModules.Count; i++)
             {
@@ -167,8 +167,9 @@ namespace FishTank.Anima
                 float deviationAngle = (float)(fishTank.Random.NextDouble() * Math.PI * 2);
                 standardBody.CollisionPolygon.TranslateTo(spawnPoint + new Vector2(deviationMagnitude * (float)Math.Cos(deviationMagnitude), deviationMagnitude * (float)Math.Sin(deviationMagnitude)));
 
+                //Make dominant color by food
                 RaycastFishConfig newConfig = FishConfig;
-                newConfig.DrawColor = familyColor;
+                if (otherFish.FoodValue > FoodValue) newConfig.DrawColor = otherFish.FishConfig.DrawColor;
 
                 RaycastFish childFish = new RaycastFish(standardBody, species, childrenModules[i], newConfig);
                 fishTank.AddEntity(childFish);
@@ -222,12 +223,22 @@ namespace FishTank.Anima
             currentRaytraceData = new double[currentRaytraces.Length][];
             for (int i = 0; i < currentRaytraces.Length; i++)
             {
-                double[] raytraceOutput = VisualRaytracer.ProcessRaytrace(entitiesToCheck, currentRaytraces[i], FishConfig.RaycastOneHots);
+                double[] raytraceOutput = VisualRaytracer.ProcessRaytrace(this, entitiesToCheck, currentRaytraces[i], FishConfig.RaycastOneHots);
                 currentRaytraceData[i] = raytraceOutput;
                 inputs.AddRange(raytraceOutput);
             }
 
             return inputs.ToArray();
+        }
+
+        public override void OnIntersection(Entity otherEntity, Tank fishTank)
+        {
+            if (FishConfig.Carnivore && otherEntity is RaycastFish otherFish && !otherFish.FishConfig.DrawColor.Equals(FishConfig.DrawColor) && otherFish.FoodValue < FoodValue)
+            {
+                //Eat fish
+                FoodValue += FishConfig.CarnivorousFoodValue;
+                fishTank.RemoveEntity(otherEntity);
+            }
         }
     }
 
@@ -249,9 +260,12 @@ namespace FishTank.Anima
 
         public readonly double MutationRate;
 
+        public readonly bool Carnivore;
+        public readonly float CarnivorousFoodValue;
+
         public Brush DrawColor;
 
-        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, int HiddenNeurons, float StartingFoodValue, float Metabolism, float BreedingThreshold, float BreedingCost, float BreedingRadius, double MutationRate, Brush DrawColor)
+        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, int HiddenNeurons, float StartingFoodValue, float Metabolism, float BreedingThreshold, float BreedingCost, float BreedingRadius, double MutationRate, Brush DrawColor, bool Carnivore, float CarnivorousFoodValue)
         {
             this.NumRaycasts = NumRaycasts;
             this.TotalRaycastAngle = TotalRaycastAngle;
@@ -267,6 +281,8 @@ namespace FishTank.Anima
             this.BreedingRadius = BreedingRadius;
             this.MutationRate = MutationRate;
             this.DrawColor = DrawColor;
+            this.Carnivore = Carnivore;
+            this.CarnivorousFoodValue = CarnivorousFoodValue;
         }
     }
 }

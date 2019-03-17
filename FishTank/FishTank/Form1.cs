@@ -25,7 +25,7 @@ namespace FishTank
         private void TankVisual_Load(object sender, EventArgs e)
         {
             //TEST 
-            testTank = new RaytraceTank(Width, Height, new RaytraceTankConfig(25, 75, 2.5F));
+            testTank = new RaytraceTank(Width, Height, new RaytraceTankConfig(50, 75, 2.5F));
         }
 
         private void paint(object sender, PaintEventArgs e)

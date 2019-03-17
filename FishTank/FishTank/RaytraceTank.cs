@@ -13,15 +13,19 @@ namespace FishTank
 {
     class RaytraceTank : Tank
     {
-        public static bool IsFood(Entity entity)
+        public static bool IsFood(Entity self, Entity entity)
         {
             return entity is FoodNode;
         }
-        public static bool IsFish(Entity entity)
+        public static bool IsFish(Entity self, Entity entity)
         {
             return entity is Fish;
         }
-        public static bool IsBoundary(Entity entity)
+        public static bool IsEnemyFish(Entity self, Entity entity)
+        {
+            return entity is RaycastFish rayFish && !((RaycastFish)self).FishConfig.DrawColor.Equals(rayFish.FishConfig.DrawColor);
+        }
+        public static bool IsBoundary(Entity self, Entity entity)
         {
             return entity is Boundary;
         }
@@ -39,13 +43,13 @@ namespace FishTank
             for (int i = 0; i < tankConfig.NumSpawn; i++)
             {
                 Fish newFish = new RaycastFish(RaycastFish.GetStandardBody(this), "Test Fish", Random, 
-                    new RaycastFishConfig(5, (float)Math.PI, 200F, new VisualRaytracer.OneHotIndicator[] { IsBoundary, IsFish, IsFood }, 20, 10F, .01F, 15F, 10F, 300F, .02, Brushes.Blue));
+                    new RaycastFishConfig(5, (float)Math.PI, 200F, new VisualRaytracer.OneHotIndicator[] { IsBoundary, IsEnemyFish, IsFood }, 10, 10F, .005F, 12F, 10F, 300F, .025, new SolidBrush(System.Drawing.Color.FromArgb(Random.Next(0, 256), Random.Next(0, 256), Random.Next(0, 256))), false, 2.5F));
                 AddEntity(newFish);
             }
 
             for (int i = 0; i < tankConfig.FoodQuantity; i++)
             {
-                AddEntity(new FoodNode(new Vector2((float)Random.NextDouble() * Width, (float)Random.NextDouble() * Height), tankConfig.FoodValue));
+                AddEntity(new FoodNode(new Vector2((float)Random.NextDouble() * Width, (float)Random.NextDouble() * Height), tankConfig.FoodValue, tickTimeout: 150));
             }
         }
     }
