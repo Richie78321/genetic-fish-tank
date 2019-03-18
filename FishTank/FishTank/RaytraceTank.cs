@@ -32,9 +32,12 @@ namespace FishTank
 
         //Object
         private RaytraceTankConfig tankConfig;
-        public RaytraceTank(float width, float height, RaytraceTankConfig tankConfig) : base(width, height, new Random())
+        private RaycastFishConfig fishConfig;
+
+        public RaytraceTank(float width, float height, RaytraceTankConfig tankConfig, RaycastFishConfig fishConfig, Random random) : base(width, height, random)
         {
             this.tankConfig = tankConfig;
+            this.fishConfig = fishConfig;
             InitialSpawn();
         }
 
@@ -42,8 +45,9 @@ namespace FishTank
         {
             for (int i = 0; i < tankConfig.NumSpawn; i++)
             {
-                Fish newFish = new RaycastFish(RaycastFish.GetStandardBody(this), "Test Fish", Random, 
-                    new RaycastFishConfig(5, (float)Math.PI, 200F, new VisualRaytracer.OneHotIndicator[] { IsBoundary, IsEnemyFish, IsFood }, 10, 10F, .005F, 12F, 10F, 300F, .025, new SolidBrush(System.Drawing.Color.FromArgb(Random.Next(0, 256), Random.Next(0, 256), Random.Next(0, 256))), false, 2.5F));
+                RaycastFishConfig instanceConfig = fishConfig;
+                instanceConfig.DrawColor = new SolidBrush(System.Drawing.Color.FromArgb(Random.Next(0, 256), Random.Next(0, 256), Random.Next(0, 256)));
+                Fish newFish = new RaycastFish(RaycastFish.GetStandardBody(this), "Test Fish", Random, instanceConfig);
                 AddEntity(newFish);
             }
 
