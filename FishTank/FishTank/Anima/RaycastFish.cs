@@ -23,7 +23,7 @@ namespace FishTank.Anima
         {
             //Create phenotypes
             SequentialModelFactory sequentialModelFactory = new SequentialModelFactory(new int[] { (fishConfig.NumRaycasts * (fishConfig.RaycastOneHots.Length + 1)) + GLOBAL_INPUTS });
-            sequentialModelFactory.AddModel(new DenseLayer(fishConfig.HiddenNeurons, ComputationModel.ReLUActivation));
+            //sequentialModelFactory.AddModel(new DenseLayer(fishConfig.HiddenNeurons, ComputationModel.ReLUActivation));
             sequentialModelFactory.AddModel(new DenseLayer(OUTPUT_NUM, ComputationModel.LinearActivation));
             Phenotype[] phenotypes = new Phenotype[1];
             phenotypes[(int)Modules.NeuralNet] = sequentialModelFactory.DeployModel();

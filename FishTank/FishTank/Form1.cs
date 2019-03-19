@@ -30,7 +30,7 @@ namespace FishTank
         private void TankVisual_Load(object sender, EventArgs e)
         {
             RaycastFishConfig fishConfig = new RaycastFishConfig(
-                NumRaycasts: 5,
+                NumRaycasts: 3,
                 TotalRaycastAngle: (float)Math.PI, 
                 RaycastLength: 200F, 
                 RaycastOneHots: new VisualRaytracer.OneHotIndicator[] { RaytraceTank.IsBoundary, RaytraceTank.IsEnemyFish, RaytraceTank.IsFood }, //Data collected from raycasts, onehot encoded
