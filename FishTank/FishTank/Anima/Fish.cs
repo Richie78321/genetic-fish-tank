@@ -13,8 +13,12 @@ namespace FishTank.Anima
     {
         public abstract string Species { get; }
 
-        //TEMP
         public float FoodValue;
+
+        public enum Modules
+        {
+            NeuralNet
+        }
 
         public override RigidBodyRef RigidBody => rigidBody;
         private ModularMember modularMember;

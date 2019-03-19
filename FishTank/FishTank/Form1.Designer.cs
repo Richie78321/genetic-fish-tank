@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.autoUpdateTimer = new System.Windows.Forms.Timer(this.components);
+            this.neuralPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // autoUpdateTimer
@@ -38,11 +39,20 @@
             this.autoUpdateTimer.Interval = 15;
             this.autoUpdateTimer.Tick += new System.EventHandler(this.autoUpdateTimer_Tick);
             // 
+            // neuralPanel
+            // 
+            this.neuralPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.neuralPanel.Location = new System.Drawing.Point(699, 12);
+            this.neuralPanel.Name = "neuralPanel";
+            this.neuralPanel.Size = new System.Drawing.Size(622, 423);
+            this.neuralPanel.TabIndex = 0;
+            // 
             // TankVisual
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1252, 769);
+            this.ClientSize = new System.Drawing.Size(1333, 823);
+            this.Controls.Add(this.neuralPanel);
             this.DoubleBuffered = true;
             this.Name = "TankVisual";
             this.Text = "Fish Tank";
@@ -55,6 +65,7 @@
         #endregion
 
         private System.Windows.Forms.Timer autoUpdateTimer;
+        private System.Windows.Forms.Panel neuralPanel;
     }
 }
 

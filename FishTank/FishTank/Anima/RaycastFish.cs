@@ -61,11 +61,6 @@ namespace FishTank.Anima
         private const float TURN_DELTA = (float)Math.PI / 128;
         private const float MOVE_SPEED = 1F;
 
-        private enum Modules
-        {
-            NeuralNet
-        }
-
         public static void DrawPolygon(Polygon polygon, Brush brush, PaintEventArgs e)
         {
             Vector2[] vertices = polygon.Vertices;
