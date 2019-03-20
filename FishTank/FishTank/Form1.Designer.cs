@@ -33,7 +33,7 @@
             this.neuralPanel = new System.Windows.Forms.Panel();
             this.layerIndexNumeric = new System.Windows.Forms.NumericUpDown();
             this.neuronIndexNumeric = new System.Windows.Forms.NumericUpDown();
-            this.viewNeuron = new System.Windows.Forms.Button();
+            this.neuronInputLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.layerIndexNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.neuronIndexNumeric)).BeginInit();
             this.SuspendLayout();
@@ -66,32 +66,35 @@
             this.neuronIndexNumeric.Size = new System.Drawing.Size(48, 20);
             this.neuronIndexNumeric.TabIndex = 1;
             // 
-            // viewNeuron
+            // neuronInputLabel
             // 
-            this.viewNeuron.Location = new System.Drawing.Point(807, 441);
-            this.viewNeuron.Name = "viewNeuron";
-            this.viewNeuron.Size = new System.Drawing.Size(75, 20);
-            this.viewNeuron.TabIndex = 2;
-            this.viewNeuron.Text = "View";
-            this.viewNeuron.UseVisualStyleBackColor = true;
+            this.neuronInputLabel.AutoSize = true;
+            this.neuronInputLabel.Location = new System.Drawing.Point(807, 445);
+            this.neuronInputLabel.Name = "neuronInputLabel";
+            this.neuronInputLabel.Size = new System.Drawing.Size(71, 13);
+            this.neuronInputLabel.TabIndex = 2;
+            this.neuronInputLabel.Text = "Neuron Label";
             // 
             // TankVisual
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1333, 823);
-            this.Controls.Add(this.viewNeuron);
+            this.Controls.Add(this.neuronInputLabel);
             this.Controls.Add(this.neuronIndexNumeric);
             this.Controls.Add(this.layerIndexNumeric);
             this.Controls.Add(this.neuralPanel);
             this.DoubleBuffered = true;
+            this.KeyPreview = true;
             this.Name = "TankVisual";
             this.Text = "Fish Tank";
             this.Load += new System.EventHandler(this.TankVisual_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.paint);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyDown);
             ((System.ComponentModel.ISupportInitialize)(this.layerIndexNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.neuronIndexNumeric)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -101,7 +104,7 @@
         private System.Windows.Forms.Panel neuralPanel;
         private System.Windows.Forms.NumericUpDown layerIndexNumeric;
         private System.Windows.Forms.NumericUpDown neuronIndexNumeric;
-        private System.Windows.Forms.Button viewNeuron;
+        private System.Windows.Forms.Label neuronInputLabel;
     }
 }
 

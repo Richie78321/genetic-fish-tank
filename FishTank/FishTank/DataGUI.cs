@@ -15,7 +15,7 @@ namespace FishTank
     class DataGUI
     {
         private const float NEURON_DRAW_SCALE = .5F;
-        public static PointF[][] DrawDenseLayers(DenseLayer[] denseLayers, float drawWidth, float drawHeight, PaintEventArgs e)
+        public static void DrawDenseLayers(DenseLayer[] denseLayers, float drawWidth, float drawHeight, int selectedLayer, int selectedNeuron, PaintEventArgs e)
         {
             int[] neuronCounts = new int[denseLayers.Length + 1];
             neuronCounts[0] = denseLayers[0].InputShape[0] + 1;
@@ -40,19 +40,27 @@ namespace FishTank
             }
 
             //Draw weights
-            for (int i = 1; i < neuronCounts.Length; i++)
+            int layerSelection = MathHelper.Clamp(selectedLayer, 0, neuronCounts.Length - 1);
+            int neuronSelection = MathHelper.Clamp(selectedNeuron, 0, neuronCounts[layerSelection] - 1);
+            if (layerSelection - 1 >= 0 && (layerSelection == neuronCounts.Length - 1 || neuronSelection > 0))
             {
-                int biasOffset = Convert.ToInt32(i != neuronCounts.Length - 1);
-                for (int j = biasOffset; j < neuronCounts[i]; j++)
+                int neuronOffset = Convert.ToInt32(layerSelection != neuronCounts.Length - 1);
+                //Draw input weights (not input and not bias neuron)
+                for (int i = 0; i < neuronCounts[layerSelection - 1]; i++)
                 {
-                    for (int k = 0; k < neuronCounts[i - 1]; k++)
-                    {
-                        DrawWeight(neuronPositions[i - 1][k], neuronPositions[i][j], denseLayers[i - 1].BakedParameterValues[((j - biasOffset) * neuronCounts[i - 1]) + k], e);
-                    }
+                    DrawWeight(neuronPositions[layerSelection - 1][i], neuronPositions[layerSelection][neuronSelection], denseLayers[layerSelection - 1].BakedParameterValues[((neuronSelection - neuronOffset) * neuronCounts[layerSelection - 1]) + i], e);
                 }
             }
-
-            return neuronPositions;
+            if (layerSelection + 1 < neuronCounts.Length)
+            {
+                int neuronOffset = Convert.ToInt32(layerSelection + 1 != neuronCounts.Length - 1);
+                //Draw output weights (not output)
+                for (int i = neuronOffset; i < neuronCounts[layerSelection + 1]; i++)
+                {
+                    DrawWeight(neuronPositions[layerSelection][neuronSelection], neuronPositions[layerSelection + 1][i], 
+                        denseLayers[layerSelection].BakedParameterValues[(neuronCounts[layerSelection] * (i - neuronOffset)) + neuronSelection], e);
+                }
+            }
         }
 
         private const float MIN_LINE_WEIGHT = .1F, MAX_LINE_WEIGHT = 5F;
@@ -72,25 +80,39 @@ namespace FishTank
 
         private NumericUpDown layerNumeric;
         private NumericUpDown neuronNumeric;
+        private Label neuronInputLabel;
 
-        public DataGUI(TankVisual tankForm, Panel neuralPanel, NumericUpDown layerNumeric, NumericUpDown neuronNumeric)
+        public DataGUI(TankVisual tankForm, Panel neuralPanel, NumericUpDown layerNumeric, NumericUpDown neuronNumeric, Label neuronInputLabel)
         {
             this.tankForm = tankForm;
             this.neuralPanel = neuralPanel;
             this.layerNumeric = layerNumeric;
             this.neuronNumeric = neuronNumeric;
+            this.neuronInputLabel = neuronInputLabel;
 
             neuralPanel.Paint += paintNeuralPanel;
             tankForm.MouseClick += mouseClick;
+
+            layerNumeric.ValueChanged += NeuronNumeric_ValueChanged;
+            neuronNumeric.ValueChanged += NeuronNumeric_ValueChanged;
+        }
+
+        private void NeuronNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            neuralPanel.Invalidate();
         }
 
         private DenseLayer[] selectedBrain = null;
-        private PointF[][] neuronPositions = null;
+        private string[] selectedNeuronInputLabels = null;
         private void paintNeuralPanel(object sender, PaintEventArgs e)
         {
             if (selectedBrain != null)
             {
-                neuronPositions = DrawDenseLayers(selectedBrain, neuralPanel.Width, neuralPanel.Height, e);
+                //Update neuron input label
+                if (layerNumeric.Value == 0 && neuronNumeric.Value != 0) neuronInputLabel.Text = selectedNeuronInputLabels[(int)neuronNumeric.Value - 1];
+                else neuronInputLabel.Text = "Not Input";
+
+                DrawDenseLayers(selectedBrain, neuralPanel.Width, neuralPanel.Height, (int)layerNumeric.Value, (int)neuronNumeric.Value, e);
             }
         }
 
@@ -118,6 +140,9 @@ namespace FishTank
             SequentialModel fishNN = (SequentialModel)fish.ModularMember.Phenotypes[(int)Fish.Modules.NeuralNet];
             selectedBrain = new DenseLayer[fishNN.Phenotypes.Length];
             for (int i = 0; i < fishNN.Phenotypes.Length; i++) selectedBrain[i] = (DenseLayer)fishNN.Phenotypes[i];
+
+            //Get neuron input labels
+            selectedNeuronInputLabels = fish.InputKey;
 
             //Redraw neural visual
             neuralPanel.Invalidate();

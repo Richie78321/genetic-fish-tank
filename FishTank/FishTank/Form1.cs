@@ -30,10 +30,11 @@ namespace FishTank
         private void TankVisual_Load(object sender, EventArgs e)
         {
             RaycastFishConfig fishConfig = new RaycastFishConfig(
-                NumRaycasts: 3,
-                TotalRaycastAngle: (float)Math.PI, 
-                RaycastLength: 200F, 
+                NumRaycasts: 5,
+                TotalRaycastAngle: (float)Math.PI,
+                RaycastLength: 200F,
                 RaycastOneHots: new VisualRaytracer.OneHotIndicator[] { RaytraceTank.IsBoundary, RaytraceTank.IsEnemyFish, RaytraceTank.IsFood }, //Data collected from raycasts, onehot encoded
+                OneHotLabels: new string[] { "Is Boundary?", "Is Enemy Fish?", "Is Food?" },
                 HiddenNeurons: 8, //Neurons in hidden layer
                 StartingFoodValue: 10F,
                 Metabolism: .005F, //Food lost per tick
@@ -52,7 +53,7 @@ namespace FishTank
                 foodValue: 2.5F //The food value from each node
                 ), fishConfig, new Random());
 
-            dataGUI = new DataGUI(this, neuralPanel);
+            dataGUI = new DataGUI(this, neuralPanel, layerIndexNumeric, neuronIndexNumeric, neuronInputLabel);
         }
 
         private void paint(object sender, PaintEventArgs e)
@@ -69,6 +70,11 @@ namespace FishTank
         {
             UpdateTank();
             Invalidate();
+        }
+
+        private void keyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Space) autoUpdateTimer.Enabled = !autoUpdateTimer.Enabled;
         }
     }
 }

@@ -16,13 +16,13 @@ namespace FishTank.Anima
 {
     class RaycastFish : Fish
     {
-        private const int GLOBAL_INPUTS = 3;
+        private static readonly string[] GLOBAL_INPUTS = { "Total Rotation", "Food Value", "Last Moved Left?" };
         private const int OUTPUT_NUM = 2;
 
         public static ModularMember CreateModularMember(Random random, RaycastFishConfig fishConfig)
         {
             //Create phenotypes
-            SequentialModelFactory sequentialModelFactory = new SequentialModelFactory(new int[] { (fishConfig.NumRaycasts * (fishConfig.RaycastOneHots.Length + 1)) + GLOBAL_INPUTS });
+            SequentialModelFactory sequentialModelFactory = new SequentialModelFactory(new int[] { (fishConfig.NumRaycasts * (fishConfig.RaycastOneHots.Length + 1)) + GLOBAL_INPUTS.Length });
             //sequentialModelFactory.AddModel(new DenseLayer(fishConfig.HiddenNeurons, ComputationModel.ReLUActivation));
             sequentialModelFactory.AddModel(new DenseLayer(OUTPUT_NUM, ComputationModel.LinearActivation));
             Phenotype[] phenotypes = new Phenotype[1];
@@ -76,12 +76,29 @@ namespace FishTank.Anima
             return new RigidBodyRef(new RegularPolygon(new Vector2((float)fishTank.Random.NextDouble() * fishTank.Width, (float)fishTank.Random.NextDouble() * fishTank.Height), 10, 3), DefinedMaterials.Rubber, null);
         }
 
+        public static string[] ProduceInputKey(RaycastFishConfig fishConfig)
+        {
+            string[] inputKey = new string[(fishConfig.NumRaycasts * (fishConfig.RaycastOneHots.Length + 1)) + GLOBAL_INPUTS.Length];
+            for (int i = 0; i < GLOBAL_INPUTS.Length; i++) inputKey[i] = GLOBAL_INPUTS[i];
+
+            string[] raytraceInputs = new string[fishConfig.OneHotLabels.Length + 1];
+            raytraceInputs[0] = "Raytrace Activation Length";
+            for (int i = 1; i < raytraceInputs.Length; i++) raytraceInputs[i] = fishConfig.OneHotLabels[i - 1];
+
+            //Add raytrace inputs
+            for (int i = GLOBAL_INPUTS.Length; i < inputKey.Length; i++) inputKey[i] = raytraceInputs[(i - GLOBAL_INPUTS.Length) % raytraceInputs.Length];
+
+            return inputKey;
+        }
+
         //Object
         public override string Species => species;
         private string species;
 
         public readonly RaycastFishConfig FishConfig;
         public bool CanBreed => FoodValue >= FishConfig.BreedingThreshold;
+
+        public override string[] InputKey => ProduceInputKey(FishConfig);
 
         public RaycastFish(RigidBodyRef rigidBody, string species, Random random, RaycastFishConfig fishConfig) : base(CreateModularMember(random, fishConfig), rigidBody, fishConfig.StartingFoodValue)
         {
@@ -243,6 +260,7 @@ namespace FishTank.Anima
         public readonly float TotalRaycastAngle;
         public readonly float RaycastAngleDelta;
         public readonly float RaycastLength;
+        public readonly string[] OneHotLabels;
         public readonly VisualRaytracer.OneHotIndicator[] RaycastOneHots;
         public readonly int HiddenNeurons;
 
@@ -260,7 +278,7 @@ namespace FishTank.Anima
 
         public Brush DrawColor;
 
-        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, int HiddenNeurons, float StartingFoodValue, float Metabolism, float BreedingThreshold, float BreedingCost, float BreedingRadius, double MutationRate, Brush DrawColor, bool Carnivore, float CarnivorousFoodValue)
+        public RaycastFishConfig(int NumRaycasts, float TotalRaycastAngle, float RaycastLength, VisualRaytracer.OneHotIndicator[] RaycastOneHots, string[] OneHotLabels, int HiddenNeurons, float StartingFoodValue, float Metabolism, float BreedingThreshold, float BreedingCost, float BreedingRadius, double MutationRate, Brush DrawColor, bool Carnivore, float CarnivorousFoodValue)
         {
             this.NumRaycasts = NumRaycasts;
             this.TotalRaycastAngle = TotalRaycastAngle;
@@ -268,6 +286,7 @@ namespace FishTank.Anima
             this.RaycastOneHots = RaycastOneHots;
             this.HiddenNeurons = HiddenNeurons;
             RaycastAngleDelta = TotalRaycastAngle / (NumRaycasts - 1);
+            this.OneHotLabels = OneHotLabels;
 
             this.StartingFoodValue = StartingFoodValue;
             this.Metabolism = Metabolism;
