@@ -33,26 +33,14 @@ namespace FishTank.Anima
 
         public static LineSegment[] CreateVisualRays(Vector2 origin, float totalRotation, RaycastFishConfig fishConfig)
         {
-            float rotationAngle = totalRotation - (float)(Math.PI / 2);
+            float rotationHeader = totalRotation - (float)(Math.PI / 2);
+            float rotationStart = rotationHeader - (fishConfig.TotalRaycastAngle / 2);
             LineSegment[] visualRays = new LineSegment[fishConfig.NumRaycasts];
 
-            int incrementLevels = (int)Math.Ceiling((double)(fishConfig.NumRaycasts + 1) / 2);
-            for (int i = 0; i < incrementLevels; i++)
+            for (int i = 0; i < visualRays.Length; i++)
             {
-                if (i != 0)
-                {
-                    for (int j = 0; j < 2 && (i * 2) + j - 1 < fishConfig.NumRaycasts; j++)
-                    {
-                        float angle = rotationAngle + (fishConfig.RaycastAngleDelta * i * ((j * 2) - 1));
-                        Vector2 rotationPoint = new Vector2((float)Math.Cos(angle) * fishConfig.RaycastLength, (float)Math.Sin(angle) * fishConfig.RaycastLength);
-                        visualRays[(i * 2) + j - 1] = new LineSegment(origin, rotationPoint + origin);
-                    }
-                }
-                else
-                {
-                    Vector2 rotationPoint = new Vector2((float)Math.Cos(rotationAngle) * fishConfig.RaycastLength, (float)Math.Sin(rotationAngle) * fishConfig.RaycastLength);
-                    visualRays[0] = new LineSegment(origin, rotationPoint + origin);
-                }
+                float angle = rotationStart + (fishConfig.RaycastAngleDelta * i);
+                visualRays[i] = new LineSegment(origin, new Vector2(origin.X + ((float)Math.Cos(angle) * fishConfig.RaycastLength), origin.Y + ((float)Math.Sin(angle) * fishConfig.RaycastLength)));
             }
 
             return visualRays;
@@ -105,7 +93,6 @@ namespace FishTank.Anima
         public override void Draw(Tank fishTank, PaintEventArgs e)
         {
             DrawPolygon(RigidBody.CollisionPolygon, FishConfig.DrawColor, e);
-            //e.Graphics.FillEllipse(Brushes.Blue, RigidBody.CollisionPolygon.CenterPoint.X - (DRAW_SIZE / 2), RigidBody.CollisionPolygon.CenterPoint.Y - (DRAW_SIZE / 2), DRAW_SIZE, DRAW_SIZE);
             //if (currentRaytraces != null)
             //{
             //    for (int i = 0; i < currentRaytraces.Length; i++)
