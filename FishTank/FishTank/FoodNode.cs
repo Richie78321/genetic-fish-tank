@@ -46,7 +46,7 @@ namespace FishTank
             //Make consumed
             if (otherEntity is Fish fish)
             {
-                fish.FoodValue += foodValue;
+                fish.IncrementFoodValue(foodValue);
                 fishTank.RemoveEntity(this);
                 fishTank.AddEntityIn(new FoodNode(new Vector2((float)fishTank.Random.NextDouble() * fishTank.Width, (float)fishTank.Random.NextDouble() * fishTank.Height), foodValue, tickTimeout), tickTimeout);
             }

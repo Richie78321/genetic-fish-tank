@@ -49,11 +49,22 @@ namespace FishTank
 
             currentTank = new RaytraceTank(Width / 2, Height, new RaytraceTankConfig(
                 numSpawn: 50, //Number of initial fish
-                foodQuantity: 75, //Quantity of food nodes (this does not change)
+                foodQuantity: 50, //Quantity of food nodes (this does not change)
                 foodValue: 2.5F //The food value from each node
-                ), fishConfig, new Random());
+                ), 
+                fishConfig, 
+                new Random(),
+                new DataCollection(tickResolution: 10)); //Resolution of data collection
 
             dataGUI = new DataGUI(this, neuralPanel, layerIndexNumeric, neuronIndexNumeric, neuronInputLabel);
+
+            this.FormClosed += TankVisual_FormClosed;
+        }
+
+        private void TankVisual_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //Save data
+            currentTank.DataCollector.SaveData();
         }
 
         private void paint(object sender, PaintEventArgs e)

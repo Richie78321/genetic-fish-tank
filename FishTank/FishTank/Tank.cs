@@ -13,13 +13,16 @@ namespace FishTank
     {
         public readonly Random Random;
 
+        public readonly DataCollection DataCollector;
+
         public readonly float Width, Height;
-        public Tank(float width, float height, Random random)
+        public Tank(float width, float height, Random random, DataCollection dataCollector)
         {
             Width = width;
             Height = height;
             AddBoundaries();
             this.Random = random;
+            this.DataCollector = dataCollector;
 
             collisionEventHandler.OnIntersection += CollisionEventHandler_OnIntersection;
         }
@@ -87,6 +90,9 @@ namespace FishTank
             //Update entities
             Entity[] currentContainedEntities = containedEntities.ToArray();
             for (int i = 0; i < currentContainedEntities.Length; i++) currentContainedEntities[i].Update(this);
+
+            //Update collector
+            DataCollector.UpdateCollector(this);
         }
 
         public void Draw(PaintEventArgs e)

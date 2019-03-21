@@ -34,7 +34,7 @@ namespace FishTank
         private RaytraceTankConfig tankConfig;
         private RaycastFishConfig fishConfig;
 
-        public RaytraceTank(float width, float height, RaytraceTankConfig tankConfig, RaycastFishConfig fishConfig, Random random) : base(width, height, random)
+        public RaytraceTank(float width, float height, RaytraceTankConfig tankConfig, RaycastFishConfig fishConfig, Random random, DataCollection dataCollector) : base(width, height, random, dataCollector)
         {
             this.tankConfig = tankConfig;
             this.fishConfig = fishConfig;

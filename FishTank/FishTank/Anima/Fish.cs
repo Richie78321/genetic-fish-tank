@@ -14,7 +14,18 @@ namespace FishTank.Anima
     {
         public abstract string Species { get; }
 
-        public float FoodValue;
+        public float FoodValue => foodValue;
+        private float foodValue;
+
+        public float Fitness => fitness;
+        private float fitness;
+        public void IncrementFoodValue(float increment)
+        {
+            foodValue += increment;
+
+            //Add food gain to fitness
+            fitness += Math.Max(increment, 0);
+        }
 
         public enum Modules
         {
@@ -32,7 +43,7 @@ namespace FishTank.Anima
             this.rigidBody = rigidBody;
             this.modularMember = modularMember;
             rigidBody.EntityReference = this;
-            FoodValue = startingFoodValue;
+            foodValue = startingFoodValue;
         }
     }
 }

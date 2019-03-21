@@ -119,7 +119,7 @@ namespace FishTank.Anima
         public override void Update(Tank fishTank)
         {
             //Apply metabolism
-            FoodValue -= FishConfig.Metabolism;
+            IncrementFoodValue(-FishConfig.Metabolism);
             if (FoodValue <= 0) HandleDeath(fishTank);
 
             //Check breeding
@@ -173,8 +173,8 @@ namespace FishTank.Anima
                 RaycastFish childFish = new RaycastFish(standardBody, species, childrenModules[i], newConfig);
                 fishTank.AddEntity(childFish);
             }
-            FoodValue -= FishConfig.BreedingCost;
-            otherFish.FoodValue -= otherFish.FishConfig.BreedingCost;
+            IncrementFoodValue(-FishConfig.BreedingCost);
+            otherFish.IncrementFoodValue(-otherFish.FishConfig.BreedingCost);
         }
 
         private bool lastMovedLeft = true;
@@ -235,7 +235,7 @@ namespace FishTank.Anima
             if (FishConfig.Carnivore && otherEntity is RaycastFish otherFish && !otherFish.FishConfig.DrawColor.Equals(FishConfig.DrawColor) && otherFish.FoodValue < FoodValue)
             {
                 //Eat fish
-                FoodValue += FishConfig.CarnivorousFoodValue;
+                IncrementFoodValue(FishConfig.CarnivorousFoodValue);
                 fishTank.RemoveEntity(otherEntity);
             }
         }
