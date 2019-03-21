@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ImpulseEngine2;
 using ModularGenetics;
+using System.Drawing;
 
 namespace FishTank.Anima
 {
@@ -13,8 +14,14 @@ namespace FishTank.Anima
     {
         public abstract string Species { get; }
 
-        //TEMP
         public float FoodValue;
+
+        public enum Modules
+        {
+            NeuralNet
+        }
+
+        public abstract string[] InputKey { get; }
 
         public override RigidBodyRef RigidBody => rigidBody;
         private ModularMember modularMember;
