@@ -109,7 +109,7 @@ namespace FishTank
             if (selectedBrain != null)
             {
                 //Update neuron input label
-                if (layerNumeric.Value == 0 && neuronNumeric.Value != 0) neuronInputLabel.Text = selectedNeuronInputLabels[(int)neuronNumeric.Value - 1];
+                if (layerNumeric.Value == 0 && neuronNumeric.Value != 0) neuronInputLabel.Text = selectedNeuronInputLabels[MathHelper.Clamp((int)neuronNumeric.Value - 1, 0, selectedNeuronInputLabels.Length - 1)];
                 else neuronInputLabel.Text = "Not Input";
 
                 DrawDenseLayers(selectedBrain, neuralPanel.Width, neuralPanel.Height, (int)layerNumeric.Value, (int)neuronNumeric.Value, e);

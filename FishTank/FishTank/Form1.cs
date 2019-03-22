@@ -41,20 +41,20 @@ namespace FishTank
                 BreedingThreshold: 15F, //Required food to breed
                 BreedingCost: 10F, //Food cost of breeding
                 BreedingRadius: 300F, //Radius to search for mates
-                MutationRate: .025, //Rate of mutation in children
+                MutationRate: .05, //Rate of mutation in children
                 DrawColor: null, 
                 Carnivore: false, //Can eat other fish
                 CarnivorousFoodValue: 2.5F //Food value from eating other fish
                 );
 
             currentTank = new RaytraceTank(Width / 2, Height, new RaytraceTankConfig(
-                numSpawn: 50, //Number of initial fish
-                foodQuantity: 50, //Quantity of food nodes (this does not change)
+                numSpawn: 100, //Number of initial fish
+                foodQuantity: 30, //Quantity of food nodes (this does not change)
                 foodValue: 2.5F //The food value from each node
                 ), 
                 fishConfig, 
                 new Random(),
-                new DataCollection(tickResolution: 100)); //Resolution of data collection
+                new DataCollection(tickResolution: 10)); //Resolution of data collection
 
             dataGUI = new DataGUI(this, neuralPanel, layerIndexNumeric, neuronIndexNumeric, neuronInputLabel);
 

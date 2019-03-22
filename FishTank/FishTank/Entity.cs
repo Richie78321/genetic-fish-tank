@@ -16,6 +16,8 @@ namespace FishTank
         public abstract void Update(Tank fishTank);
         public abstract void Draw(Tank fishTank, PaintEventArgs e);
 
+        public virtual void UpdateParallel(Tank fishTank) { }
+
         public virtual void OnIntersection(Entity otherEntity, Tank fishTank) { }
     }
 }

@@ -41,7 +41,7 @@
             // autoUpdateTimer
             // 
             this.autoUpdateTimer.Enabled = true;
-            this.autoUpdateTimer.Interval = 15;
+            this.autoUpdateTimer.Interval = 10;
             this.autoUpdateTimer.Tick += new System.EventHandler(this.autoUpdateTimer_Tick);
             // 
             // neuralPanel

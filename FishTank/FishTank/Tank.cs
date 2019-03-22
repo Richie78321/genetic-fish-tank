@@ -89,6 +89,9 @@ namespace FishTank
 
             //Update entities
             Entity[] currentContainedEntities = containedEntities.ToArray();
+            //Update parallel
+            Parallel.ForEach(currentContainedEntities, t => t.UpdateParallel(this));
+            //Update normal
             for (int i = 0; i < currentContainedEntities.Length; i++) currentContainedEntities[i].Update(this);
 
             //Update collector
