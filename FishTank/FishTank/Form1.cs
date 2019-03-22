@@ -54,7 +54,7 @@ namespace FishTank
                 ), 
                 fishConfig, 
                 new Random(),
-                new DataCollection(tickResolution: 10)); //Resolution of data collection
+                new DataCollection(tickResolution: 100)); //Resolution of data collection
 
             dataGUI = new DataGUI(this, neuralPanel, layerIndexNumeric, neuronIndexNumeric, neuronInputLabel);
 
